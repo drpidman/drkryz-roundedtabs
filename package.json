@@ -4,17 +4,28 @@
   "description": "Add rounded edges to your vscode guides. Make almost everything more modern!",
   "publisher": "drkryz",
   "icon": "dist/icon/logo_bg_none.png",
+  "version": "0.0.6",
   "galleryBanner": {
 		"color": "#070707",
 		"theme": "dark"
 	},
-  "version": "0.0.4",
+  "keywords": [
+    "Custom VSCode Theme",
+    "Custom VSCode Workbench",
+    "Custom VSCode Workbench css"
+  ],
   "engines": {
     "vscode": "^1.86.0"
   },
   "categories": [
     "Other", "Themes"
   ],
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drpidman/drkryz-roundedtabs"
+  },
+  
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
