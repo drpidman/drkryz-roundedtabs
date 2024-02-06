@@ -1,17 +1,5 @@
-<style>
-    .logo img {
-        width: 60px;
-        height: 60px;
-        background: #000;
-        border-radius: 50%;
-        padding: 0.5rem;
-
-        margin-bottom: .9rem;
-    }
-</style>
-
 <div align="center" class="logo">
-<img src="assets/logo_bg_none.png">
+<img width="50px" src="assets/logo_bg_none.png">
 </div>
 
 <div align="center">
