@@ -1,20 +1,56 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
-import { readFileSync, copyFileSync } from 'fs';
+import { readFileSync, copyFileSync, existsSync } from 'fs';
 import path from 'path';
 import * as os from "os";
+import { create } from 'domain';
 
 export function activate(context: vscode.ExtensionContext) {
     const config = () => vscode.workspace.getConfiguration("roundedtabs");
 
     let cssFileName = "workbench.desktop.main.css";
 
-    function getVstCss(): string {
+    function createInputPlaceFolder(): Thenable<string | undefined> {
+        return new Promise((resolve, reject) => {
+            vscode.window.showInputBox({
+                title: "VSCode Installation Path",
+                prompt: "Place your path of installation vscode here",
+                ignoreFocusOut: true
+            }).then((file) => {
+                if (typeof file === "undefined") {
+                    return reject("Please, provide a installation path");
+                }
+
+                return resolve(file);
+            });
+        });
+    }
+
+    async function getVstCss(): Promise<string> {
         if (process.platform === "win32") {
             let winUser = os.userInfo().username;
-            return `C:\\Users\\${winUser}\\AppData\\Local\\Programs\\Microsoft VS Code\\resources\\app\\out\\vs\\${cssFileName}`;
-        } else if (process.platform === "linux") {
-            return `/opt/visual-studio-code/resources/app/out/vs/workbench/${cssFileName}`;
+            let winPath = `C:\\Users\\${winUser}\\AppData\\Local\\Programs\\Microsoft VS Code\\resources\\app\\out\\vs\\workbench\\${cssFileName}`;
+            if (existsSync(winPath)) {
+                return winPath;
+            }
+            
+            const res_file = await createInputPlaceFolder();
+            if (res_file && existsSync(res_file)) {
+                return `${path.join(res_file, '/resources', '/app', '/out', '/vs', '/workbench', `${cssFileName}`)}`;
+            }
+        } 
+        
+        if (process.platform === "linux") {
+            if (existsSync(`/opt/visual-studio-code/resources/app/out/vs/workbench/${cssFileName}`)) {
+                return `/opt/visual-studio-code/resources/app/out/vs/workbench/${cssFileName}`;
+            } 
+
+            const res_file = await createInputPlaceFolder();
+            if (res_file && existsSync(res_file)) {
+                return `${res_file}/resources/app/out/vs/workbench/${cssFileName}`;
+            } else {
+                vscode.window.showInformationMessage("Please, provide a valid installation path of vscode");
+            }
         }
 
         return "";
@@ -22,9 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     function getModCss(): string {
         if (process.platform === "win32") {
-            let winUser = os.userInfo().username;
-
-            return `\\css\\workbench.desktop.mod.css`;
+            return `${path.join(__dirname, '/css', 'workbench.desktop.mod.css')}`;
         } else if (process.platform === "linux") {
             return `/css/workbench.desktop.mod.css`;
         }
@@ -35,8 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     function getBckCss(): string {
         if (process.platform === "win32") {
-            let winUser = os.userInfo().username;
-            return `\\css\\workbench.desktop.backup.css`;
+            return `${path.join(__dirname, '/css', 'workbench.desktop.backup.css')}`;
         } else if (process.platform === "linux") {
             return `/css/workbench.desktop.backup.css`;
         }
@@ -54,7 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
             });
 
             if (password) {
-                const sudoCommand = `echo ${password} | sudo -S cp ${path.join(__dirname, getBckCss())} ${getVstCss()}`;
+                const sudoCommand = `echo ${password} | sudo -S cp ${path.join(__dirname, getBckCss())} ${await getVstCss()}`;
                 cp.exec(sudoCommand, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`Error executing sudo command: ${error}`);
@@ -71,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         } else if (process.platform === "win32") {
             try {
-                copyFileSync(getBckCss(), getVstCss());
+                copyFileSync(getBckCss(), await getVstCss());
             } catch(err) {
                 console.error(err);
                 vscode.window.showInformationMessage("Error to copy mod file to vscode directory. Try execute vscode with administrator");
@@ -91,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
             });
 
             if (password) {
-                const sudoCommand = `echo ${password} | sudo -S cp ${path.join(__dirname, getModCss())} ${getVstCss()}`;
+                const sudoCommand = `echo ${password} | sudo -S cp ${path.join(__dirname, getModCss())} ${await getVstCss()}`;
                 cp.exec(sudoCommand, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`Error executing sudo command: ${error}`);
@@ -108,7 +141,12 @@ export function activate(context: vscode.ExtensionContext) {
             }
         } else if (process.platform === "win32") {
             try {
-                copyFileSync(getModCss(), getVstCss());
+                copyFileSync(getModCss(), await getVstCss());
+                vscode.window.showInformationMessage("Success applying styles, restart now", "Restart").then((value) => {
+                    if (value === "Restart") {
+                        vscode.commands.executeCommand("workbench.action.reloadWindow");
+                    }
+                });
             } catch(err) {
                 console.error(err);
                 vscode.window.showInformationMessage("Error to copy mod file to vscode directory. Try execute vscode with administrator");
