@@ -59,7 +59,9 @@ export function activate(context: vscode.ExtensionContext) {
     function getModCss(): string {
         if (process.platform === "win32") {
             return `${path.join(__dirname, '/css', 'workbench.desktop.mod.css')}`;
-        } else if (process.platform === "linux") {
+        } 
+        
+        if (process.platform === "linux") {
             return `/css/workbench.desktop.mod.css`;
         }
 
@@ -70,7 +72,9 @@ export function activate(context: vscode.ExtensionContext) {
     function getBckCss(): string {
         if (process.platform === "win32") {
             return `${path.join(__dirname, '/css', 'workbench.desktop.backup.css')}`;
-        } else if (process.platform === "linux") {
+        }
+        
+        if (process.platform === "linux") {
             return `/css/workbench.desktop.backup.css`;
         }
 
@@ -102,12 +106,19 @@ export function activate(context: vscode.ExtensionContext) {
                     });
                 });
             }
-        } else if (process.platform === "win32") {
+        }
+        
+        if (process.platform === "win32") {
             try {
                 copyFileSync(getBckCss(), await getVstCss());
+                vscode.window.showInformationMessage("Success applying styles, restart now", "Restart").then((value) => {
+                    if (value === "Restart") {
+                        vscode.commands.executeCommand("workbench.action.reloadWindow");
+                    }
+                });
             } catch(err) {
                 console.error(err);
-                vscode.window.showInformationMessage("Error to copy mod file to vscode directory. Try execute vscode with administrator");
+                vscode.window.showInformationMessage("Error to copy backup file to vscode directory. Try execute vscode with administrator");
             }
         } else {
             return;
@@ -139,7 +150,9 @@ export function activate(context: vscode.ExtensionContext) {
                     });
                 });
             }
-        } else if (process.platform === "win32") {
+        }
+        
+        if (process.platform === "win32") {
             try {
                 copyFileSync(getModCss(), await getVstCss());
                 vscode.window.showInformationMessage("Success applying styles, restart now", "Restart").then((value) => {
