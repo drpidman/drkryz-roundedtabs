@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (process.platform === "darwin") {
-            return `${path.join(__dirname, "/css", "workbench.desktop.mod.css")}`;
+            return `/css/workbench.desktop.mod.css`;
         }
 
         return "";
@@ -105,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (process.platform === "darwin") {
-            return `${path.join(__dirname, "/css", "workbench.backup.mod.css")}`;
+            return `/css/workbench.desktop.backup.css`;
         }
 
 
