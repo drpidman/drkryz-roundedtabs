@@ -41,8 +41,10 @@ export function activate(context: vscode.ExtensionContext) {
         } 
         
         if (process.platform === "linux") {
-            if (existsSync(`/opt/visual-studio-code/resources/app/out/vs/workbench/${cssFileName}`)) {
-                return `/opt/visual-studio-code/resources/app/out/vs/workbench/${cssFileName}`;
+            let linuxPath = `/opt/visual-studio-code/resources/app/out/vs/workbench/${cssFileName}`;
+
+            if (existsSync(linuxPath)) {
+                return linuxPath;
             } 
 
             const res_file = await createInputPlaceFolder();
@@ -68,7 +70,6 @@ export function activate(context: vscode.ExtensionContext) {
         return "";
     }
 
-
     function getBckCss(): string {
         if (process.platform === "win32") {
             return `${path.join(__dirname, '/css', 'workbench.desktop.backup.css')}`;
@@ -80,7 +81,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         return "";
     }
-
 
     let restore = vscode.commands.registerCommand('drkryz-roundedtabs.restore', async () => {
         if (process.platform === "linux") {
@@ -118,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             } catch(err) {
                 console.error(err);
-                vscode.window.showInformationMessage("Error to copy backup file to vscode directory. Try execute vscode with administrator");
+                vscode.window.showInformationMessage(`Error to copy backup file to vscode directory. Try execute vscode with administrator. More info: ${err}`);
             }
         } else {
             return;
@@ -162,7 +162,7 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             } catch(err) {
                 console.error(err);
-                vscode.window.showInformationMessage("Error to copy mod file to vscode directory. Try execute vscode with administrator");
+                vscode.window.showInformationMessage(`Error to copy mod file to vscode directory. Try execute vscode with administrator. More info: ${err}`);
             }
         } else {
             return;
