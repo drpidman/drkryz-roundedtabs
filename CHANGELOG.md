@@ -1,4 +1,7 @@
 # Change Log
+* 0.2.3
+  - Implemenatation for macOs(test)
+
 * 0.2.0
   - Bug fixes in UI
 
