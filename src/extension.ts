@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             const res_file = await createInputPlaceFolder();
             if (res_file && existsSync(res_file)) {
-                return `"${res_file}/resources/app/out/vs/workbench/${cssFileName}"`;
+                return `${res_file}/resources/app/out/vs/workbench/${cssFileName}`;
             } else {
                 vscode.window.showInformationMessage("Please, provide a valid installation path of vscode");
             }
@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             const res_file = await createInputPlaceFolder();
             if (res_file && existsSync(res_file)) {
-                return `${res_file}/Contents/Resouces/app/out/vs/workbench/${cssFileName}`;
+                return `"${res_file}/Contents/Resouces/app/out/vs/workbench/${cssFileName}"`;
             } else {
                 vscode.window.showInformationMessage("Please, provide a valid installation path of vscode");
             }
