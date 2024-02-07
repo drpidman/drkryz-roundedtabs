@@ -62,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (process.platform === "darwin") {
-            let macPath = `/Users/${username}/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/workbench/${cssFileName}`;
+            let macPath = `"/Users/${username}/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/workbench/${cssFileName}"`;
 
             if (existsSync(macPath)) {
                 return macPath;
