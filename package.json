@@ -4,7 +4,7 @@
   "description": "Add rounded edges to your vscode guides. Make almost everything more modern!",
   "publisher": "drkryz",
   "icon": "dist/icon/logo_bg_none.png",
-  "version": "0.1.9",
+  "version": "0.2.1",
   "galleryBanner": {
 		"color": "#070707",
 		"theme": "dark"

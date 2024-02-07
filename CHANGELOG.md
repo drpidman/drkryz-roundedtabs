@@ -1,4 +1,6 @@
 # Change Log
+* 0.2.0
+  - Bug fixes in UI
 
 * 0.1.9 
   - Backup file for windows
