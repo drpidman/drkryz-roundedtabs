@@ -5,6 +5,11 @@ import path from 'path';
 import * as os from "os";
 import { create } from 'domain';
 
+enum Action {
+    Copy,
+    Move
+}
+
 export function activate(context: vscode.ExtensionContext) {
     const config = () => vscode.workspace.getConfiguration("roundedtabs");
 
@@ -27,9 +32,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     async function getVstCss(): Promise<string> {
+        let username = os.userInfo().username;
+
         if (process.platform === "win32") {
-            let winUser = os.userInfo().username;
-            let winPath = `C:\\Users\\${winUser}\\AppData\\Local\\Programs\\Microsoft VS Code\\resources\\app\\out\\vs\\workbench\\${cssFileName}`;
+            let winPath = `C:\\Users\\${username}\\AppData\\Local\\Programs\\Microsoft VS Code\\resources\\app\\out\\vs\\workbench\\${cssFileName}`;
             if (existsSync(winPath)) {
                 return winPath;
             }
@@ -55,6 +61,21 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
 
+        if (process.platform === "darwin") {
+            let macPath = `/Users/${username}/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/workbench/${cssFileName}`;
+
+            if (existsSync(macPath)) {
+                return macPath;
+            }
+
+            const res_file = await createInputPlaceFolder();
+            if (res_file && existsSync(res_file)) {
+                return `${res_file}/Contents/Resouces/app/out/vs/workbench/${cssFileName}`;
+            } else {
+                vscode.window.showInformationMessage("Please, provide a valid installation path of vscode");
+            }
+        }
+
         return "";
     }
 
@@ -65,6 +86,10 @@ export function activate(context: vscode.ExtensionContext) {
         
         if (process.platform === "linux") {
             return `/css/workbench.desktop.mod.css`;
+        }
+
+        if (process.platform === "darwin") {
+            return `${path.join(__dirname, "/css", "workbench.desktop.mod.css")}`;
         }
 
         return "";
@@ -79,7 +104,34 @@ export function activate(context: vscode.ExtensionContext) {
             return `/css/workbench.desktop.backup.css`;
         }
 
+        if (process.platform === "darwin") {
+            return `${path.join(__dirname, "/css", "workbench.backup.mod.css")}`;
+        }
+
+
         return "";
+    }
+
+    function actionMod(password: string, srcDir: string, destDir: string) {
+        if (process.platform !== "linux" && process.platform !== "darwin") return;
+        
+        if (password) {
+            const sudoCommand = `echo ${password} | sudo -S cp ${srcDir} ${destDir}`;
+            cp.exec(sudoCommand, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error executing sudo command: ${error}`);
+                    vscode.window.showErrorMessage(`Error executing sudo command: ${error}`);
+                    return;
+                } 
+
+                vscode.window.showInformationMessage("Success applying styles, restart now", "Restart").then((value) => {
+                    if (value === "Restart") {
+                        vscode.commands.executeCommand("workbench.action.reloadWindow");
+                    }
+                });
+            });
+        }
+    
     }
 
     let restore = vscode.commands.registerCommand('drkryz-roundedtabs.restore', async () => {
@@ -134,22 +186,12 @@ export function activate(context: vscode.ExtensionContext) {
                 ignoreFocusOut: true,
             });
 
-            if (password) {
-                const sudoCommand = `echo ${password} | sudo -S cp ${path.join(__dirname, getModCss())} ${await getVstCss()}`;
-                cp.exec(sudoCommand, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Error executing sudo command: ${error}`);
-                        vscode.window.showErrorMessage(`Error executing sudo command: ${error}`);
-                        return;
-                    } 
-
-                    vscode.window.showInformationMessage("Success applying styles, restart now", "Restart").then((value) => {
-                        if (value === "Restart") {
-                            vscode.commands.executeCommand("workbench.action.reloadWindow");
-                        }
-                    });
-                });
+            if (!password) {
+                vscode.window.showInformationMessage("Please, provide a password");
+                return;
             }
+
+            actionMod(password, path.join(__dirname, getModCss()), await getVstCss());
         }
         
         if (process.platform === "win32") {
@@ -164,8 +206,21 @@ export function activate(context: vscode.ExtensionContext) {
                 console.error(err);
                 vscode.window.showInformationMessage(`Error to copy mod file to vscode directory. Try execute vscode with administrator. More info: ${err}`);
             }
-        } else {
-            return;
+        }
+
+        if (process.platform === "darwin") {
+            const password = await vscode.window.showInputBox({
+                prompt: 'Enter your sudo password',
+                password: true,
+                ignoreFocusOut: true,
+            });
+
+            if (!password) {
+                vscode.window.showInformationMessage("Please, provide a password");
+                return;
+            }
+
+            actionMod(password, path.join(__dirname, getModCss()), await getVstCss());
         }
     });
 
