@@ -62,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (process.platform === "darwin") {
-            let macPath = `"/Users/${username}/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/workbench/${cssFileName}"`;
+            let macPath = `/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/workbench/${cssFileName}`;
 
             if (existsSync(macPath)) {
                 return macPath;
@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             const res_file = await createInputPlaceFolder();
             if (res_file && existsSync(res_file)) {
-                return `"${res_file}/Contents/Resouces/app/out/vs/workbench/${cssFileName}"`;
+                return `${res_file}/Contents/Resouces/app/out/vs/workbench/${cssFileName}`;
             } else {
                 vscode.window.showInformationMessage("Please, provide a valid installation path of vscode");
             }
@@ -220,7 +220,7 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
 
-            actionMod(password, path.join(__dirname, getModCss()), await getVstCss());
+            actionMod(password, path.join(__dirname, getModCss()), `"${await getVstCss()}"`);
         }
     });
 
